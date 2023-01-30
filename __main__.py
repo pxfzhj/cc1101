@@ -11,7 +11,7 @@ from binascii import hexlify, unhexlify
 from . import config, CC1101
 
 
-def tx(args: argparse.Namespace) -> None:
+def tx(args):
     """Handle the tx subcommand"""
 
     modulation = config.Modulation(args.modulation)
@@ -54,7 +54,7 @@ def tx(args: argparse.Namespace) -> None:
         config.print_raw_config(cc1101.get_device_config())
 
 
-def rx(args: argparse.Namespace) -> None:
+def rx(args):
     """Handle the rx subcommand"""
 
     modulation = config.Modulation(args.modulation)
@@ -142,7 +142,7 @@ def rx(args: argparse.Namespace) -> None:
                 time.sleep(0.1)
 
 
-def conf(args: argparse.Namespace) -> None:
+def conf(args):
     """Handle the conf subcommand"""
 
     cc1101 = CC1101(args.device, None)
@@ -165,7 +165,7 @@ def conf(args: argparse.Namespace) -> None:
     print("Max Packet Size: {packet_size}".format(packet_size=cc1101.get_max_packet_size()))
 
 
-def reset(args: argparse.Namespace) -> None:
+def reset(args):
     """Handle the reset subcommand"""
 
     cc1101 = CC1101(args.device, None)
