@@ -108,7 +108,7 @@ def rx(args):
         min_rssi = None
         max_rssi = None
 
-        print("Receiving Packets", file=sys.stderr)
+        print("Receiving Packets")
         while True:
             if args.out_format == "rssi":
                 rssi = cc1101.get_rssi()
@@ -172,7 +172,7 @@ def reset(args):
     cc1101.reset()
 
 
-def main() -> None:
+def main():
     parser = argparse.ArgumentParser(prog="cc1101")
     subparsers = parser.add_subparsers()
 
