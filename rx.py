@@ -12,6 +12,7 @@ while True:
     packets = radio.receive()
 
     for packet in packets:
-        print(f"Received - {hexlify(packet)}")
+        #print(f"Received - {hexlify(packet)}")
+        print("Received - {data}".format(data=hexlify(packet)))
     
     sleep(0.1)
