@@ -40,7 +40,7 @@ def tx(args: argparse.Namespace) -> None:
             )
 
     except ValueError as e:
-        print(f"Error: {e}")
+        print("Error: {e}".format(e=e))
         return
 
     cc1101 = CC1101(args.device, None, False)
@@ -95,7 +95,7 @@ def rx(args: argparse.Namespace) -> None:
             sync_word=sync_word,
         )
     except ValueError as e:
-        print(f"Error: {e}")
+        print("Error: {e}".format(e=e))
         return
 
     cc1101 = CC1101(args.device, rx_config, args.block)
@@ -120,7 +120,7 @@ def rx(args: argparse.Namespace) -> None:
                     max_rssi = rssi
 
                 output = (
-                    f"\rCurrent: {rssi} dB / Min: {min_rssi} dB / Max: {max_rssi} dB"
+                    "\rCurrent: {rssi} dB / Min: {min_rssi} dB / Max: {max_rssi} dB".format(rssi=rssi, min_rssi=min_rssi, max_rssi=max_rssi)
                 )
                 sys.stdout.write("\r" + " " * count)
                 sys.stdout.write("\r" + output)
@@ -131,7 +131,7 @@ def rx(args: argparse.Namespace) -> None:
                         packet_hex = hexlify(packet).decode("ascii")
 
                         if args.out_format == "info":
-                            print(f"[{count} - {cc1101.get_rssi()} dB] {packet_hex}")
+                            print("[{count} - {rssi} dB] {packet_hex}".format(count=count, rssi=cc1101.get_rssi(), packet_hex=packet_hex))
                         else:
                             print(packet_hex)
 
@@ -162,7 +162,7 @@ def conf(args: argparse.Namespace) -> None:
     elif args.conf_type == "dev_raw":
         config.print_raw_config(cc1101.get_device_config())
 
-    print(f"Max Packet Size: {cc1101.get_max_packet_size()}")
+    print("Max Packet Size: {packet_size}".format(packet_size=cc1101.get_max_packet_size()))
 
 
 def reset(args: argparse.Namespace) -> None:
