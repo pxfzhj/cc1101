@@ -11,7 +11,7 @@ from binascii import hexlify, unhexlify
 from . import config, CC1101
 
 
-def tx(args):
+def tx(args: argparse.Namespace) -> None:
     """Handle the tx subcommand"""
 
     modulation = config.Modulation(args.modulation)
@@ -40,7 +40,7 @@ def tx(args):
             )
 
     except ValueError as e:
-        print("Error: {e}".format(e=e))
+        print(f"Error: {e}")
         return
 
     cc1101 = CC1101(args.device, None, False)
@@ -54,7 +54,7 @@ def tx(args):
         config.print_raw_config(cc1101.get_device_config())
 
 
-def rx(args):
+def rx(args: argparse.Namespace) -> None:
     """Handle the rx subcommand"""
 
     modulation = config.Modulation(args.modulation)
@@ -95,7 +95,7 @@ def rx(args):
             sync_word=sync_word,
         )
     except ValueError as e:
-        print("Error: {e}".format(e=e))
+        print(f"Error: {e}")
         return
 
     cc1101 = CC1101(args.device, rx_config, args.block)
@@ -108,7 +108,7 @@ def rx(args):
         min_rssi = None
         max_rssi = None
 
-        print("Receiving Packets")
+        print("Receiving Packets", file=sys.stderr)
         while True:
             if args.out_format == "rssi":
                 rssi = cc1101.get_rssi()
@@ -120,7 +120,7 @@ def rx(args):
                     max_rssi = rssi
 
                 output = (
-                    "\rCurrent: {rssi} dB / Min: {min_rssi} dB / Max: {max_rssi} dB".format(rssi=rssi, min_rssi=min_rssi, max_rssi=max_rssi)
+                    f"\rCurrent: {rssi} dB / Min: {min_rssi} dB / Max: {max_rssi} dB"
                 )
                 sys.stdout.write("\r" + " " * count)
                 sys.stdout.write("\r" + output)
@@ -131,7 +131,7 @@ def rx(args):
                         packet_hex = hexlify(packet).decode("ascii")
 
                         if args.out_format == "info":
-                            print("[{count} - {rssi} dB] {packet_hex}".format(count=count, rssi=cc1101.get_rssi(), packet_hex=packet_hex))
+                            print(f"[{count} - {cc1101.get_rssi()} dB] {packet_hex}")
                         else:
                             print(packet_hex)
 
@@ -142,7 +142,7 @@ def rx(args):
                 time.sleep(0.1)
 
 
-def conf(args):
+def conf(args: argparse.Namespace) -> None:
     """Handle the conf subcommand"""
 
     cc1101 = CC1101(args.device, None)
@@ -162,17 +162,17 @@ def conf(args):
     elif args.conf_type == "dev_raw":
         config.print_raw_config(cc1101.get_device_config())
 
-    print("Max Packet Size: {packet_size}".format(packet_size=cc1101.get_max_packet_size()))
+    print(f"Max Packet Size: {cc1101.get_max_packet_size()}")
 
 
-def reset(args):
+def reset(args: argparse.Namespace) -> None:
     """Handle the reset subcommand"""
 
     cc1101 = CC1101(args.device, None)
     cc1101.reset()
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(prog="cc1101")
     subparsers = parser.add_subparsers()
 
