@@ -10,17 +10,8 @@ from typing import Dict, Tuple, Type, Optional
 
 from cc1101.errors import ConfigError, ConfigException
 
-from .patable import TX_POWERS_315, TX_POWERS_433, TX_POWERS_868, TX_POWERS_915
-
 # Crystal frequency of 26 Mhz
 XTAL_FREQ = 26
-DEFAULT_DEVIATION = 47.607422
-DEFAULT_BANDWIDTH = 203
-DEFAULT_SYNC_WORD = 0x0000
-DEFAULT_MAX_LNA_GAIN = 0
-DEFAULT_MAX_DVGA_GAIN = 0
-DEFAULT_MAGN_TARGET = 33
-DEFAULT_CARRIER_SENSE = 6
 
 class Registers(IntEnum):
     """Mapping of register name to address
@@ -94,7 +85,7 @@ class StatusRegisters(IntEnum):
     RCCTRL1_STATUS = 0x3C
     RCCTRL0_STATUS = 0x3D
 
-    STATUS_SIZE = 0x0E
+STATUS_SIZE = 0x0E
 
 class cc1101_config_t(ctypes.Structure):
     """C struct definition for cc1101_rx_config from cc1101.h"""
@@ -234,9 +225,6 @@ class CC1101Config:
         ret += f"pa_gain: 0x{self.get_pa_gain():08X}\n"
         return ret
 
-
-
-
 def print_raw_config(config_bytes: bytes) -> None:
     """Print an array of CC1101 config bytes as register key/values"""
     config = {}
@@ -246,3 +234,17 @@ def print_raw_config(config_bytes: bytes) -> None:
 
     for k in config.keys():
         print(f"{k}: {config[k]:02x}")
+
+def print_raw_status(config_bytes: bytes) -> None:
+    """Print an array of CC1101 status bytes as register key/values"""
+    config = {}
+
+    for r in StatusRegisters:
+        config[r.name] = config_bytes[r.value]
+
+    for k in config.keys():
+        print(f"{k}: {config[k]:02x}")
+
+def print_config(config_bytes: bytes):
+    cf = CC1101Config.from_bytes(config_bytes)
+    print(cf)

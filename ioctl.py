@@ -16,13 +16,9 @@ class IOCTL(IntEnum):
 
     GET_VERSION = 0
     RESET = 1
-    # SET_TX_CONF = 2
-    # SET_RX_CONF = 3
-    SET_CONF = 2
-    # GET_TX_CONF = 4
-    # GET_TX_RAW_CONF = 5
-    GET_CONF = 6
-    GET_STATUS = 7
+    SET_TX_CONF = 2
+    GET_RX_CONF = 6
+    GET_RX_RAW_CONF = 7
     GET_DEV_RAW_CONF = 8
     GET_RSSI = 9
     GET_MAX_PACKET_SIZE = 10
