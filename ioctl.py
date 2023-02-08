@@ -21,8 +21,8 @@ class IOCTL(IntEnum):
     SET_CONF = 2
     # GET_TX_CONF = 4
     # GET_TX_RAW_CONF = 5
-    GET_RX_CONF = 6
-    CC1101_GET_STATUS = 7
+    GET_CONF = 6
+    GET_STATUS = 7
     GET_DEV_RAW_CONF = 8
     GET_RSSI = 9
     GET_MAX_PACKET_SIZE = 10

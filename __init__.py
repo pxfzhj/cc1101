@@ -8,7 +8,7 @@ import errno
 
 from typing import List, Optional, Type
 from types import TracebackType
-from cc1101.config import RXConfig, TXConfig, CONFIG_SIZE, CC1101Config,CC1101Config
+from cc1101.config import CONFIG_SIZE
 from cc1101 import ioctl
 from cc1101.errors import DeviceError, DeviceException
 
@@ -52,15 +52,12 @@ class CC1101:
     handle: Optional[CC1101Handle] = None
 
     def __init__(
-        self, dev: str, rx_config: Optional[CC1101Config] = None, blocking: bool = False
+        self, dev: str, blocking: bool = False
     ):
         self.dev = dev
 
         if blocking:
             self.handle = CC1101Handle(self._open(), True)
-
-        if rx_config is not None:
-            self.set_rx_config(rx_config)
 
     def __del__(self) -> None:
         if self.handle is not None:
@@ -92,69 +89,12 @@ class CC1101:
         """Reset the CC1101 device"""
         with self._get_handle() as fh:
             ioctl.call(fh, ioctl.IOCTL.RESET)
-
-    def set_tx_config(self, tx_config: TXConfig) -> None:
-        """Set the device transmit configuration"""
-        with self._get_handle() as fh:
-            ioctl.write(fh, ioctl.IOCTL.SET_TX_CONF, tx_config.to_bytes())
-
-    def set_rx_config(self, rx_config: RXConfig) -> None:
-        """Set the device receive configuration"""
-
-        # If the new config is the same as the old config
-        if rx_config == self.rx_config:
-
-            # If not blocking mode
-            if self.handle is None:
-                # Get the config from the device
-                device_config = self.get_rx_config_bytes()
-
-                # If the config on the device differs (i.e it has been reconfigured from under us)
-                if rx_config.to_bytes() != device_config:
-                    # Reconfigure the device
-                    with self._get_handle() as fh:
-                        ioctl.write(
-                            fh, ioctl.IOCTL.SET_RX_CONF, self.rx_config.to_bytes()
-                        )
-
-        # Otherwise, update the stored config and reconfigure the device
-        else:
-            self.rx_config = rx_config
-            with self._get_handle() as fh:
-                ioctl.write(fh, ioctl.IOCTL.SET_RX_CONF, self.rx_config.to_bytes())
-    # BEFORE
-    # def transmit(self, tx_config: TXConfig, packet: bytes) -> None:
-    #     """Transmit a sequence of bytes using a TX configuration"""
-    #     with self._get_handle() as fh:
-    #         ioctl.write(fh, ioctl.IOCTL.SET_TX_CONF, tx_config.to_bytes())
-    #         os.write(fh, packet)
     
-    def transmit(self, config: CC1101Config, packet: bytes) -> None:
-        """Transmit a sequence of bytes using a TX configuration"""
+    def transmit(self, packet: bytes) -> None:
+        """Transmit a sequence of bytes"""
         with self._get_handle() as fh:
             #ioctl.write(fh, ioctl.IOCTL.SET_CONF, config.to_bytes())
             os.write(fh, packet)
-
-    # def receive(self) -> List[bytes]:
-    #     """Read a sequence of packets from the device's receive buffer"""
-
-    #     if self.rx_config is not None:
-    #         self.set_rx_config(self.rx_config)
-    #         packets = []
-
-    #         with self._get_handle() as fh:
-    #             while True:
-    #                 try:
-    #                     packets.append(os.read(fh, self.rx_config.packet_length))
-    #                 except OSError as e:
-    #                     if e.errno == errno.ENOMSG:
-    #                         return packets
-    #                     elif e.errno == errno.EMSGSIZE:
-    #                         raise DeviceException(DeviceError.PACKET_SIZE)
-    #                     elif e.errno == errno.EFAULT:
-    #                         raise DeviceException(DeviceError.COPY)
-
-    #     raise IOError("RX config not set")
 
     def receive(self) -> List[bytes]:
         """Read a sequence of packets from the device's receive buffer"""
@@ -163,7 +103,6 @@ class CC1101:
             while True:
                 try:
                     packets.append(os.read(fh, 64))
-                    print("--------------------")
                 except OSError as e:
                     print(str(e))
                     if e.errno == errno.ENOMSG:
@@ -208,30 +147,21 @@ class CC1101:
         self._ioctl(ioctl.IOCTL.GET_DEV_RAW_CONF, config)
         return bytes(config)
 
-    def get_tx_config_raw(self) -> bytes:
+    def get_device_status(self) -> bytes:
         """Get the current configuration registers for TX as a sequence of bytes"""
         config = bytearray(CONFIG_SIZE)
-        self._ioctl(ioctl.IOCTL.GET_TX_RAW_CONF, config)
+        self._ioctl(ioctl.IOCTL.GET_STATUS, config)
         return bytes(config)
 
-    def get_rx_config_raw(self) -> bytes:
-        """Get the current configuration registers for RX as a sequence of bytes"""
-        config = bytearray(CONFIG_SIZE)
-        self._ioctl(ioctl.IOCTL.GET_RX_RAW_CONF, config)
-        return bytes(config)
-
-    def get_rx_config_bytes(self) -> bytes:
-        """Get the current RX configuration as struct bytes"""
-        config = bytearray(RXConfig.size())
-        self._ioctl(ioctl.IOCTL.GET_RX_CONF, config)
-        return bytes(config)
-
-    def get_rx_config(self) -> Optional[RXConfig]:
-        """Get the current RX configuration"""
-        return RXConfig.from_bytes(self.get_rx_config_bytes())
-
-    def get_tx_config(self) -> Optional[TXConfig]:
+    def get_config(self) -> Optional[TXConfig]:
         """Get the current TX configuration"""
         config = bytearray(TXConfig.size())
-        self._ioctl(ioctl.IOCTL.GET_TX_CONF, config)
+        self._ioctl(ioctl.IOCTL.GET_CONF, config)
         return TXConfig.from_bytes(config)
+
+    def set_config(self) -> Optional[TXConfig]:
+        """Get the current TX configuration"""
+        config = bytearray(TXConfig.size())
+        self._ioctl(ioctl.IOCTL.GET_CONF, config)
+        return TXConfig.from_bytes(config)
+        

@@ -59,9 +59,6 @@ def rx(args: argparse.Namespace) -> None:
 
     modulation = config.Modulation(args.modulation)
     frequency = float(args.frequency)
-    baud_rate = float(args.baud_rate)
-    sync_word = int(args.sync_word, 16)
-    packet_size = int(args.packet_size)
 
     if args.carrier_sense is None:
         carrier_sense_mode = config.CarrierSenseMode.DISABLED
@@ -147,17 +144,8 @@ def conf(args: argparse.Namespace) -> None:
 
     cc1101 = CC1101(args.device, None)
 
-    if args.conf_type == "rx":
-        print(cc1101.get_rx_config())
-
-    elif args.conf_type == "tx":
-        print(cc1101.get_tx_config())
-
-    elif args.conf_type == "rx_raw":
-        config.print_raw_config(cc1101.get_rx_config_raw())
-
-    elif args.conf_type == "tx_raw":
-        config.print_raw_config(cc1101.get_tx_config_raw())
+    if args.conf_type == "rx_raw":
+        config.print_raw_config(cc1101.get_config())
 
     elif args.conf_type == "dev_raw":
         config.print_raw_config(cc1101.get_device_config())
@@ -179,23 +167,10 @@ def main() -> None:
     tx_parser = subparsers.add_parser("tx", help="Transmit a Packet")
     tx_parser.add_argument("device", help="CC1101 Device")
     tx_parser.add_argument("frequency", help="frequency (MHz)")
-    tx_parser.add_argument(
-        "modulation",
-        type=config.Modulation.from_string,
-        choices=list(config.Modulation),
-    )
-    tx_parser.add_argument("baud_rate", help="baud rate (kBaud)")
     tx_parser.add_argument("tx_power", help="transmit power (hex or dBm)")
-    tx_parser.add_argument("packet", help="packet to transmit (hexadecimal string)")
-    tx_parser.add_argument(
-        "--sync_word", help="sync word (2 or 4 bytes hexadecimal)", default="0000"
-    )
-    tx_parser.add_argument(
-        "--deviation",
-        type=float,
-        default=47.607422,
-        help="frequency deviation for FSK modulations (MHz)",
-    )
+    tx_parser.add_argument("address", help="address to transmit (hexadecimal string)")
+    tx_parser.add_argument("channel", help="channel to transmit (hexadecimal string)")
+    
     tx_parser.add_argument(
         "--raw",
         action="store_true",
